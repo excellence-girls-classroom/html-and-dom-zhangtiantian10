@@ -1,17 +1,14 @@
-function existValue(form) {
-    var len1 = form.class.value.length;
-    var len2 = form.schoolnumber.value.length;
-    var len3 = form.name.value.length;
-    if((len1 === 0) || (len2 === 0) || (len3 === 0)){
-        if(len1 === 0){
+function existValue(classNumber, schoolNumber, name) {
+    if ((classNumber === '') || (schoolNumber === '') || (name === '')) {
+        if (classNumber === '') {
             alert("没有输入班级！");
             return false;
         }
-        if(len2 === 0){
+        if (schoolNumber === '') {
             alert("没有输入学号！");
             return false;
         }
-        if(len3 === 0){
+        if (name === '') {
             alert("没有输入姓名！");
             return false;
         }
@@ -21,63 +18,71 @@ function existValue(form) {
 function getAnswers() {
     return [
         {
-            form: document.forms[2],
+            name: document.getElementById("file_1_1"),
             answer: '统一建模语言'
         },
         {
-            form: document.forms[3],
-            answer: ['封装性', '继承性', '多态性']
+            name: document.getElementById("file_1_2_1"),
+            answer: '封装性'
         },
         {
-            form: document.forms[4],
-            answer: '(B)'
+            name: document.getElementById("file_1_2_2"),
+            answer: '继承性'
         },
         {
-            form: document.forms[5],
-            answer: '(A)'
+            name: document.getElementById("file_1_2_3"),
+            answer: '多态性'
         },
         {
-            form: document.forms[6],
-            answer: '(A)(B)(D)'
+            name: document.getElementsByName("radio_1"),
+            answer: 'B'
         },
         {
-            form: document.forms[7],
-            answer: '(A)(B)(C)'
+            name: document.getElementsByName("radio_2"),
+            answer: 'A'
         },
         {
-            form:document.forms[8],
+            name: document.getElementsByName("interest_1"),
+            answer: 'ABD'
+        },
+        {
+            name: document.getElementsByName("interest_2"),
+            answer: 'ABC'
+        },
+        {
+            name: document.getElementsByName("gender_1"),
             answer: '错'
         },
         {
-            form: document.forms[9],
+            name: document.getElementsByName("gender_2"),
             answer: '对'
         },
         {
-            form: document.forms[10],
+            name: document.getElementById("file_5"),
             answer: '模型是对现实世界的简化和抽象,模型是对所研究的系统、过程、事物或概念的一种表达形式。可以是物理实体;可以是某种图形;或者是一种数学表达式。'
         }
     ]
 }
 
-function getAnswer(form,answers) {
-    for(var i = 0; i<answers.length;i++){
-        if(form === answers[i].form){
+function getAnswer(header, answers) {
+    for (var i = 0; i < answers.length; i++) {
+        if (header === answers[i].name) {
             return answers[i].answer;
         }
     }
 }
 
-function existText1(form,answers) {
-    if(form.text.value === getAnswer(form,answers)){
+function existText(text, answers) {
+    if (text.value === getAnswer(text, answers)) {
         return 10;
     }
     return 0;
 }
 
-function existRadios(radios,answers) {
-    for(var i = 0; i < radios.gender.length; i++){
-        if(radios.gender[i].checked){
-            if(radios.gender[i].value === getAnswer(radios,answers)){
+function existRadios(radios, answers) {
+    for (var i = 0; i < radios.length; i++) {
+        if (radios[i].checked) {
+            if (radios[i].value === getAnswer(radios, answers)) {
                 return 5;
             }
         }
@@ -85,67 +90,42 @@ function existRadios(radios,answers) {
     return 0;
 }
 
-function existCheckbox(checkbox,answers) {
+function existCheckbox(names, answers) {
     var answer = "";
-    for(var i = 0;i<checkbox.interest.length; i++){
-        var rb = checkbox.interest[i];
-        if(rb.checked){
-            answer += rb.value;
+    for (var i = 0; i < names.length; i++) {
+        var name = names[i];
+        if (name.checked) {
+            answer += name.value;
         }
     }
-    if(answer === getAnswer(checkbox,answers)){
+    if (answer === getAnswer(names, answers)) {
         return 15;
     }
     return 0;
 }
 
-function existText2(form,answers) {
-    var answer = getAnswer(form,answers);
+document.getElementById("button").addEventListener('click', function(){
+    var answers = getAnswers();
+    var classNUmber = document.getElementById("classNumber").value;
+    var schoolNumber = document.getElementById("schoolNumber").value;
+    var name = document.getElementById("name").value;
+    if (existValue(classNUmber, schoolNumber, name) === false)
+        return false;
+    var interests = ['interest_1', 'interest_2'];
+    var radios = ['radio_1', 'radio_2', 'gender_1', 'gender_2'];
+    var texts = ['file_1_1', 'file_1_2_1', 'file_1_2_2', 'file_1_2_3', 'file_5'];
+    var grade = getGrade(interests, answers, radios, texts);
+    document.getElementById("grade").value = grade;
+},false);
+    
+function getGrade(interests, answers, radios, texts) {
     var grade = 0;
-    for(var i = 0; i<answer.length ; i++){
-        if(form.text1.value === answer[i]){
-            grade += 10;
-        }
-        if(form.text2.value === answer[i]){
-            grade += 10;
-        }
-        if(form.text3.value === answer[i]){
-            grade += 10;
-        }
+    for (var i = 0; i < radios.length; i++) {
+        grade += existCheckbox(document.getElementsByName(interests[i]), answers);
+        grade += existRadios(document.getElementsByName(radios[i]), answers);
+    }
+    for (var i = 0; i < texts.length; i++) {
+        grade += existText(document.getElementById(texts[i]), answers);
     }
     return grade;
 }
-
-function check() {
-    var answers = getAnswers();
-    var grade = 0;
-    for(var i = 1; i<document.forms.length;i++){
-        if(i === 1){
-            if(existValue(document.forms[i]) === false){
-                return false;
-            }
-        }
-        else if(i === 2){
-            grade += existText1(document.forms[i],answers);
-        }
-        else if(i === 3){
-            grade += existText2(document.forms[i],answers);
-        }
-        else if (i<6){
-            grade += existRadios(document.forms[i],answers);
-        }
-        else if(i<8){
-            grade += existCheckbox(document.forms[i],answers);
-        }
-        else if(i<10){
-            grade += existRadios(document.forms[i],answers);
-        }
-        else{
-            grade += existText1(document.forms[i],answers);
-        }
-    }
-    grade += ''
-    document.forms[0].grade.value = grade;
-
-}
-
